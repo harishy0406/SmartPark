@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renter Dashboard | SmartPark</title>
+    <link rel="icon" href="../images/icon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Scan Button Style */
+        .scan-btn {
+            display: inline-block;
+            background-color: #10ce19;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .scan-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* QR Scanner Modal Styles */
+        #qrScannerModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #qr-reader {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            max-width: 320px;
+            width: 100%;
+        }
+
+        /* Close Button */
+        #qrScannerModal button {
+            margin-top: 10px;
+            padding: 6px 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        #qrScannerModal button:hover {
+            background-color: #c0392b;
+        }
+
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray: #95a5a6;
+            --light-gray: #f5f7fa;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 20px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .badge {
+            background-color: var(--primary);
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            margin-top: 70px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--white);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 70px);
+            position: fixed;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+            gap: 10px;
+        }
+        
+        .sidebar-menu a:hover, 
+        .sidebar-menu a.active {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title {
+            font-size: 24px;
+            color: var(--dark);
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-card-title {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .stat-card-icon {
+            align-self: flex-end;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+        
+        .icon-primary {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary);
+        }
+        
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f9f9f9;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-available {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--success);
+        }
+        
+        .status-pending {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+        
+        .status-cancelled {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+        
+        /* View Container Styles */
+        .view-container {
+            display: none;
+        }
+        
+        .view-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Parking Spaces View */
+        .parking-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        /* Bookings View */
+        .booking-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Inbox View */
+        .inbox-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .inbox-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .inbox-item.unread {
+            background-color: rgba(52, 152, 219, 0.05);
+            font-weight: 500;
+        }
+        
+        .inbox-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        /* Profile View */
+        .profile-form {
+            max-width: 600px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .dashboard {
+                flex-direction: column;
+                margin-top: 60px;
+            }
+            
+            .nav-links, .user-menu {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="logo">Smaart<span>Park</span></a>
+            
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-view="dashboardView"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" data-view="parkingSpacesView"><i class="fas fa-parking"></i> My Spaces</a></li>
+                <li><a href="#" data-view="bookingsView"><i class="fas fa-calendar-check"></i> Bookings</a></li>
+                <li><a href="#" data-view="inboxView"><i class="fas fa-inbox"></i> Inbox <span class="badge" id="inboxBadge">0</span></a></li>
+            </ul>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">JD</div>
+                <button class="btn btn-danger" id="logoutBtn">Logout</button>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" data-view="dashboardView"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" data-view="parkingSpacesView"><i class="fas fa-parking"></i> Parking Spaces</a></li>
+                <li><a href="#" data-view="bookingsView"><i class="fas fa-calendar-check"></i> Bookings</a></li>
+                <li><a href="#" data-view="inboxView"><i class="fas fa-inbox"></i> Inbox <span class="badge" id="sidebarInboxBadge">0</span></a></li>
+                <li><a href="#" data-view="walletView"><i class="fas fa-wallet"></i> Wallet</a></li>
+                <li><a href="#" data-view="profileView"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#" data-view="settingsView"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View (default) -->
+            <div id="dashboardView" class="view-container active">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Renter Dashboard</h1>
+                    <div class="wallet-info card" style="padding: 15px; display: inline-flex; align-items: center;">
+                        <i class="fas fa-wallet" style="font-size: 24px; color: var(--primary); margin-right: 10px;"></i>
+                        <div>
+                            <div style="font-size: 12px; color: var(--gray);">Wallet Balance</div>
+                            <div style="font-size: 18px; font-weight: bold;">$<span id="walletBalance">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-title">Total Earnings</div>
+                        <div class="stat-card-value">$<span id="totalEarnings">0.00</span></div>
+                        <div class="stat-card-icon icon-primary">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-title">Active Spaces</div>
+                        <div class="stat-card-value"><span id="activeSpaces">0</span></div>
+                        <div class="stat-card-icon icon-primary">
+                            <i class="fas fa-parking"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-title">Bookings This Month</div>
+                        <div class="stat-card-value"><span id="monthlyBookings">0</span></div>
+                        <div class="stat-card-icon icon-primary">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-title">Unread Messages</div>
+                        <div class="stat-card-value"><span id="unreadMessages">0</span></div>
+                        <div class="stat-card-icon icon-primary">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 15px;">Quick Actions</h2>
+                    <div style="display: flex; gap: 15px;">
+                        <button class="btn btn-primary" id="quickAddSpaceBtn">
+                            <i class="fas fa-plus"></i> Add Parking Space
+                        </button>
+                        <button class="btn btn-success" id="quickViewBookingsBtn">
+                            <i class="fas fa-calendar-check"></i> View Bookings
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 15px;">Recent Activity</h2>
+                    <div id="recentActivity">
+                        <p style="color: var(--gray); text-align: center; padding: 20px;">No recent activity</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Parking Spaces View -->
+            <div id="parkingSpacesView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">My Parking Spaces</h1>
+                    <button class="btn btn-primary" id="addSpaceBtn">
+                        <i class="fas fa-plus"></i> Add Space
+                    </button>
+                </div>
+                
+                <div class="parking-actions">
+                    <button class="btn btn-primary" id="filterAvailableBtn">
+                        <i class="fas fa-check-circle"></i> Available
+                    </button>
+                    <button class="btn" id="filterAllBtn">
+                        <i class="fas fa-list"></i> All Spaces
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Address</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="parkingSpacesTable">
+                                <!-- Parking spaces will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bookings View -->
+            <div id="bookingsView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Bookings</h1>
+                    <td>
+                        <button class="scan-btn" onclick="openQRScanner('bookingIdHere')">
+                            <i class="fas fa-camera"></i> Scan QR
+                        </button>
+                    </td>
+                    
+                    <div id="qrScannerModal" style="display:none;">
+                        <div id="qr-reader" style="width:500px;"></div>
+                        <button onclick="closeQRScanner()">Close</button>
+                    </div>
+                    
+                    <div class="booking-filters">
+                        <select id="bookingStatusFilter" class="form-control">
+                            <option value="all">All Statuses</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <input type="date" id="bookingDateFilter" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Space</th>
+                                    <th>Customer</th>
+                                    <th>Date/Time</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allBookingsTable">
+                                <!-- All bookings will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inbox View -->
+            <div id="inboxView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Inbox</h1>
+                    <button class="btn btn-primary" id="markAllReadBtn">
+                        <i class="fas fa-envelope-open"></i> Mark All as Read
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div id="inboxList">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wallet View -->
+            <div id="walletView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Wallet</h1>
+                </div>
+                
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 14px; color: var(--gray);">Current Balance</div>
+                            <div style="font-size: 28px; font-weight: bold;">$<span id="walletBalanceView">0.00</span></div>
+                        </div>
+                        <button class="btn btn-primary" id="withdrawFundsBtn">
+                            <i class="fas fa-money-bill-wave"></i> Withdraw Funds
+                        </button>
+                    </div>
+                    
+                    <h3 style="margin-bottom: 15px;">Transaction History</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="walletTransactions">
+                                <!-- Transactions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile View -->
+            <div id="profileView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">My Profile</h1>
+                </div>
+                
+                <div class="card">
+                    <div class="profile-avatar" id="profileAvatar">JD</div>
+                    
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-group">
+                            <label for="profileName">Full Name</label>
+                            <input type="text" id="profileName" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" class="form-control" required readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profilePhone">Phone Number</label>
+                            <input type="tel" id="profilePhone" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileAddress">Address</label>
+                            <textarea id="profileAddress" class="form-control" rows="3"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Settings View -->
+            <div id="settingsView" class="view-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Settings</h1>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">Account Settings</h3>
+                    
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label for="notificationPrefs">Notification Preferences</label>
+                            <select id="notificationPrefs" class="form-control">
+                                <option value="all">All Notifications</option>
+                                <option value="important">Important Only</option>
+                                <option value="none">No Notifications</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timezone">Timezone</label>
+                            <select id="timezone" class="form-control">
+                                <option value="UTC-5">Eastern Time (UTC-5)</option>
+                                <option value="UTC-6">Central Time (UTC-6)</option>
+                                <option value="UTC-7">Mountain Time (UTC-7)</option>
+                                <option value="UTC-8">Pacific Time (UTC-8)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            Save Settings
+                        </button>
+                    </form>
+                    
+                    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <h3 style="margin-bottom: 15px;">Change Password</h3>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" class="form-control" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                Change Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Parking Space Modal -->
+    <div class="modal" id="addSpaceModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 class="modal-title">Add Parking Space</h2>
+            
+            <form id="parkingForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="spaceTitle">Title</label>
+                    <input type="text" id="spaceTitle" class="form-control" placeholder="e.g. Downtown Parking Spot" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceAddress">Address</label>
+                    <input type="text" id="spaceAddress" class="form-control" placeholder="Enter full address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceDescription">Description</label>
+                    <textarea id="spaceDescription" class="form-control" rows="3" placeholder="Describe your parking space"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="spacePrice">Price per hour ($)</label>
+                        <input type="number" id="spacePrice" class="form-control" min="1" step="0.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spaceType">Type</label>
+                        <select id="spaceType" class="form-control" required>
+                            <option value="">Select type</option>
+                            <option value="driveway">Driveway</option>
+                            <option value="garage">Garage</option>
+                            <option value="lot">Parking Lot</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Features (comma separated)</label>
+                    <input type="text" id="spaceFeatures" class="form-control" placeholder="e.g. Covered, Security Cameras, 24/7 Access">
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceImages">Upload Images</label>
+                    <input type="file" id="spaceImages" class="form-control" accept="image/*" multiple>
+                    <small class="text-muted">You can upload multiple images (JPEG, PNG)</small>
+                    <div id="imagePreview" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                    Add Parking Space
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Booking Details Modal -->
+    <div class="modal" id="bookingDetailsModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeBookingModal">&times;</span>
+            <h2 class="modal-title">Booking Details</h2>
+            
+            <div id="bookingDetailsContent">
+                <!-- Booking details will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Withdraw Funds Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeWithdrawModal">&times;</span>
+            <h2 class="modal-title">Withdraw Funds</h2>
+            
+            <form id="withdrawForm">
+                <div class="form-group">
+                    <label for="withdrawAmount">Amount ($)</label>
+                    <input type="number" id="withdrawAmount" class="form-control" min="10" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="withdrawMethod">Payment Method</label>
+                    <select id="withdrawMethod" class="form-control" required>
+                        <option value="">Select method</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="paypal">PayPal</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="bankDetails" style="display: none;">
+                    <label for="accountNumber">Account Number</label>
+                    <input type="text" id="accountNumber" class="form-control">
+                    
+                    <label for="routingNumber">Routing Number</label>
+                    <input type="text" id="routingNumber" class="form-control">
+                </div>
+                
+                <div class="form-group" id="paypalDetails" style="display: none;">
+                    <label for="paypalEmail">PayPal Email</label>
+                    <input type="email" id="paypalEmail" class="form-control">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                    Request Withdrawal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let html5QrCode;
+
+        function openQRScanner(expectedBookingId) {
+            document.getElementById("qrScannerModal").style.display = "block";
+            html5QrCode = new Html5Qrcode("qr-reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: 250
+                },
+                (decodedText, decodedResult) => {
+                    if (decodedText === expectedBookingId) {
+                        alert("Booking Verified Successfully!");
+                    } else {
+                        alert("Verification Failed. QR does not match.");
+                    }
+                    closeQRScanner();
+                },
+                (errorMessage) => {
+                    // console.log("Scanning error:", errorMessage);
+                }
+            ).catch(err => {
+                alert("Camera access failed or not supported.");
+            });
+        }
+
+        function closeQRScanner() {
+            html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                document.getElementById("qrScannerModal").style.display = "none";
+            });
+        }
+        document.getElementById('spaceImages').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        const files = e.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type.match('image.*')) continue;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in and is a renter
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            if (!currentUser || currentUser.type !== 'renter') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Initialize user data
+            initUserData(currentUser);
+            
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Event listeners
+            setupEventListeners();
+            
+            // Set active view based on URL hash
+            setInitialView();
+        });
+        
+        function initUserData(currentUser) {
+            // Set user avatar initials
+            const nameParts = currentUser.name.split(' ');
+            const initials = nameParts.map(part => part[0]).join('').toUpperCase();
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('profileAvatar').textContent = initials;
+            
+            // Initialize user settings if not exists
+            if (!currentUser.settings) {
+                currentUser.settings = {
+                    notifications: 'all',
+                    timezone: 'UTC-5'
+                };
+                localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+                updateUsersList(currentUser);
+            }
+        }
+        
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('[data-view]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView(this.getAttribute('data-view'));
+                });
+            });
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('smaartpark_currentUser');
+                window.location.href = 'index.html';
+            });
+            
+            // Add Parking Space
+            document.getElementById('addSpaceBtn').addEventListener('click', showAddSpaceModal);
+            document.getElementById('quickAddSpaceBtn')?.addEventListener('click', showAddSpaceModal);
+            
+            // Quick View Bookings
+            document.getElementById('quickViewBookingsBtn')?.addEventListener('click', function() {
+                showView('bookingsView');
+            });
+            
+            // Modal controls
+            document.getElementById('closeModal').addEventListener('click', hideAddSpaceModal);
+            document.getElementById('closeBookingModal').addEventListener('click', hideBookingModal);
+            document.getElementById('closeWithdrawModal').addEventListener('click', hideWithdrawModal);
+            
+            window.addEventListener('click', function(e) {
+                if (e.target === document.getElementById('addSpaceModal')) {
+                    hideAddSpaceModal();
+                }
+                if (e.target === document.getElementById('bookingDetailsModal')) {
+                    hideBookingModal();
+                }
+                if (e.target === document.getElementById('withdrawModal')) {
+                    hideWithdrawModal();
+                }
+            });
+            
+            // Parking form submission
+            document.getElementById('parkingForm').addEventListener('submit', addParkingSpace);
+            
+            // Booking filters
+            document.getElementById('bookingStatusFilter').addEventListener('change', loadBookingsView);
+            document.getElementById('bookingDateFilter').addEventListener('change', loadBookingsView);
+            
+            // Parking filters
+            document.getElementById('filterAvailableBtn').addEventListener('click', function() {
+                loadParkingSpacesView(true);
+                this.classList.add('btn-primary');
+                document.getElementById('filterAllBtn').classList.remove('btn-primary');
+            });
+            
+            document.getElementById('filterAllBtn').addEventListener('click', function() {
+                loadParkingSpacesView();
+                this.classList.add('btn-primary');
+                document.getElementById('filterAvailableBtn').classList.remove('btn-primary');
+            });
+            
+            // Inbox actions
+            document.getElementById('markAllReadBtn').addEventListener('click', markAllMessagesAsRead);
+            
+            // Profile form
+            document.getElementById('profileForm').addEventListener('submit', updateProfile);
+            
+            // Settings form
+            document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+            
+            // Password form
+            document.getElementById('passwordForm').addEventListener('submit', changePassword);
+            
+            // Withdraw funds
+            document.getElementById('withdrawFundsBtn').addEventListener('click', showWithdrawModal);
+            document.getElementById('withdrawMethod').addEventListener('change', function() {
+                document.getElementById('bankDetails').style.display = this.value === 'bank' ? 'block' : 'none';
+                document.getElementById('paypalDetails').style.display = this.value === 'paypal' ? 'block' : 'none';
+            });
+            document.getElementById('withdrawForm').addEventListener('submit', withdrawFunds);
+            
+            // Mobile menu toggle
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+        }
+        
+        function setInitialView() {
+            const hash = window.location.hash.substring(1);
+            const validViews = ['dashboardView', 'parkingSpacesView', 'bookingsView', 
+                               'inboxView', 'walletView', 'profileView', 'settingsView'];
+            
+            if (hash && validViews.includes(hash)) {
+                showView(hash);
+            } else {
+                showView('dashboardView');
+            }
+        }
+        
+        function showView(viewId) {
+            // Update URL hash
+            window.location.hash = viewId;
+            
+            // Hide all views
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-links a, .sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show the selected view
+            document.getElementById(viewId).classList.add('active');
+            
+            // Set active nav link
+            const navLink = document.querySelector(`.nav-links a[data-view="${viewId}"], .sidebar-menu a[data-view="${viewId}"]`);
+            if (navLink) {
+                navLink.classList.add('active');
+            }
+            
+            // Load data for the view
+            switch(viewId) {
+                case 'dashboardView':
+                    loadDashboardData();
+                    break;
+                case 'parkingSpacesView':
+                    loadParkingSpacesView();
+                    break;
+                case 'bookingsView':
+                    loadBookingsView();
+                    break;
+                case 'inboxView':
+                    loadInboxView();
+                    break;
+                case 'walletView':
+                    loadWalletView();
+                    break;
+                case 'profileView':
+                    loadProfileView();
+                    break;
+                case 'settingsView':
+                    loadSettingsView();
+                    break;
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            const userMenu = document.querySelector('.user-menu');
+            
+            if (navLinks.style.display === 'flex') {
+                navLinks.style.display = 'none';
+                userMenu.style.display = 'none';
+            } else {
+                navLinks.style.display = 'flex';
+                userMenu.style.display = 'flex';
+            }
+        }
+        
+        // Data Loading Functions
+        function loadDashboardData() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings')) || [];
+            const bookings = JSON.parse(localStorage.getItem('smaartpark_bookings')) || [];
+            
+            // Filter data for current renter
+            const renterParkings = parkings.filter(p => p.renterId === currentUser.id);
+            const renterBookings = bookings.filter(b => b.renterId === currentUser.id);
+            
+            // Current month bookings
+            const currentMonth = new Date().getMonth();
+            const monthlyBookings = renterBookings.filter(b => {
+                const bookingDate = new Date(b.createdAt || new Date().toISOString());
+                return bookingDate.getMonth() === currentMonth;
+            });
+            
+            // Update stats
+            document.getElementById('walletBalance').textContent = currentUser.wallet.toFixed(2);
+            document.getElementById('totalEarnings').textContent = renterBookings
+                .reduce((sum, booking) => sum + booking.total, 0)
+                .toFixed(2);
+            document.getElementById('activeSpaces').textContent = renterParkings.length;
+            document.getElementById('monthlyBookings').textContent = monthlyBookings.length;
+            
+            // Update inbox count
+            updateUnreadCount();
+            
+            // Load recent activity
+            loadRecentActivity(renterBookings);
+        }
+        
+        function loadRecentActivity(bookings) {
+            const recentActivity = document.getElementById('recentActivity');
+            recentActivity.innerHTML = '';
+            
+            // Sort bookings by date (newest first)
+            const sortedBookings = [...bookings].sort((a, b) => {
+                const dateA = new Date(a.createdAt || new Date().toISOString());
+                const dateB = new Date(b.createdAt || new Date().toISOString());
+                return dateB - dateA;
+            }).slice(0, 5); // Get only 5 most recent
+            
+            if (sortedBookings.length === 0) {
+                recentActivity.innerHTML = '<p style="color: var(--gray); text-align: center; padding: 20px;">No recent activity</p>';
+                return;
+            }
+            
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings')) || [];
+            const users = JSON.parse(localStorage.getItem('smaartpark_users')) || [];
+            
+            sortedBookings.forEach(booking => {
+                const parking = parkings.find(p => p.id === booking.parkingId);
+                const driver = users.find(u => u.id === booking.driverId);
+                
+                const activityItem = document.createElement('div');
+                activityItem.style.padding = '10px';
+                activityItem.style.borderBottom = '1px solid #eee';
+                activityItem.style.display = 'flex';
+                activityItem.style.justifyContent = 'space-between';
+                
+                activityItem.innerHTML = `
+                    <div>
+                        <strong>${driver?.name || 'Unknown user'}</strong> booked 
+                        <strong>${parking?.title || 'Unknown space'}</strong>
+                        <div style="font-size: 12px; color: var(--gray);">
+                            ${booking.date} at ${booking.time} for ${booking.hours} hour${booking.hours > 1 ? 's' : ''}
+                        </div>
+                    </div>
+                    <div style="font-weight: bold; color: var(--success);">
+                        +$${booking.total.toFixed(2)}
+                    </div>
+                `;
+                
+                recentActivity.appendChild(activityItem);
+            });
+        }
+        
+        function loadParkingSpacesView(showAvailableOnly = false) {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings')) || [];
+            
+            let filteredParkings = parkings.filter(p => p.renterId === currentUser.id);
+            
+            if (showAvailableOnly) {
+                filteredParkings = filteredParkings.filter(p => p.available);
+            }
+            
+            const tableBody = document.getElementById('parkingSpacesTable');
+            tableBody.innerHTML = '';
+            
+            if (filteredParkings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">
+                            No parking spaces found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredParkings.forEach(parking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${parking.title}</td>
+                    <td>${parking.address}</td>
+                    <td>$${parking.pricePerHour}/hr</td>
+                    <td>
+                        <span class="status-badge ${parking.available ? 'status-available' : 'status-cancelled'}">
+                            ${parking.available ? 'Available' : 'Unavailable'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editParking(${parking.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteParking(${parking.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <button class="btn ${parking.available ? 'btn-warning' : 'btn-success'} btn-sm" 
+                                onclick="toggleParkingAvailability(${parking.id}, ${!parking.available})">
+                            <i class="fas ${parking.available ? 'fa-eye-slash' : 'fa-eye'}"></i> 
+                            ${parking.available ? 'Make Unavailable' : 'Make Available'}
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadBookingsView() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const bookings = JSON.parse(localStorage.getItem('smaartpark_bookings')) || [];
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings')) || [];
+            const users = JSON.parse(localStorage.getItem('smaartpark_users')) || [];
+            
+            const statusFilter = document.getElementById('bookingStatusFilter').value;
+            const dateFilter = document.getElementById('bookingDateFilter').value;
+            
+            let filteredBookings = bookings.filter(b => b.renterId === currentUser.id);
+            
+            if (statusFilter !== 'all') {
+                filteredBookings = filteredBookings.filter(b => b.status === statusFilter);
+            }
+            
+            if (dateFilter) {
+                filteredBookings = filteredBookings.filter(b => b.date === dateFilter);
+            }
+            
+            const tableBody = document.getElementById('allBookingsTable');
+            tableBody.innerHTML = '';
+            
+            if (filteredBookings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            No bookings found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredBookings.forEach(booking => {
+                const parking = parkings.find(p => p.id === booking.parkingId);
+                const driver = users.find(u => u.id === booking.driverId);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${parking?.title || 'Unknown space'}</td>
+                    <td>${driver?.name || 'Unknown user'}</td>
+                    <td>${booking.date} at ${booking.time}</td>
+                    <td>$${booking.total.toFixed(2)}</td>
+                    <td>
+                        <span class="status-badge ${getStatusClass(booking.status)}">
+                            ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewBookingDetails(${booking.id})">
+                            <i class="fas fa-info-circle"></i> Details
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadInboxView() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const inbox = currentUser.inbox || [];
+            
+            const inboxList = document.getElementById('inboxList');
+            inboxList.innerHTML = '';
+            
+            if (inbox.length === 0) {
+                inboxList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray);">
+                        No messages in your inbox
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date (newest first)
+            const sortedInbox = [...inbox].sort((a, b) => {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            sortedInbox.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `inbox-item ${message.read ? '' : 'unread'}`;
+                messageDiv.innerHTML = `
+                    <div class="inbox-item-header">
+                        <strong>${getMessageType(message.type)}</strong>
+                        <small>${formatDate(message.createdAt)}</small>
+                    </div>
+                    <div class="inbox-item-body">${message.message}</div>
+                `;
+                
+                messageDiv.addEventListener('click', () => {
+                    // Mark as read if unread
+                    if (!message.read) {
+                        message.read = true;
+                        localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+                        updateUsersList(currentUser);
+                        messageDiv.classList.remove('unread');
+                        updateUnreadCount();
+                    }
+                    
+                    // Show message details (could be expanded in a real app)
+                    alert(`Message Details:\n\nType: ${getMessageType(message.type)}\nDate: ${formatDate(message.createdAt)}\n\n${message.message}`);
+                });
+                
+                inboxList.appendChild(messageDiv);
+            });
+        }
+        
+        function loadWalletView() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Update wallet balance
+            document.getElementById('walletBalanceView').textContent = currentUser.wallet.toFixed(2);
+            
+            // Load transactions
+            loadWalletTransactions();
+        }
+        
+        function loadWalletTransactions() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const transactions = currentUser.transactions || [];
+            
+            const tableBody = document.getElementById('walletTransactions');
+            tableBody.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px;">
+                            No transactions yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Sort by date (newest first)
+            const sortedTransactions = [...transactions].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedTransactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(transaction.date)}</td>
+                    <td>${transaction.description}</td>
+                    <td style="color: ${transaction.amount >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                        ${transaction.amount >= 0 ? '+' : ''}$${Math.abs(transaction.amount).toFixed(2)}
+                    </td>
+                    <td>
+                        <span class="status-badge ${getStatusClass(transaction.status)}">
+                            ${transaction.status}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadProfileView() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Set avatar initials
+            const nameParts = currentUser.name.split(' ');
+            const initials = nameParts.map(part => part[0]).join('').toUpperCase();
+            document.getElementById('profileAvatar').textContent = initials;
+            
+            // Fill form with user data
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profilePhone').value = currentUser.phone || '';
+            document.getElementById('profileAddress').value = currentUser.address || '';
+        }
+        
+        function loadSettingsView() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Set current settings
+            document.getElementById('notificationPrefs').value = currentUser.settings?.notifications || 'all';
+            document.getElementById('timezone').value = currentUser.settings?.timezone || 'UTC-5';
+        }
+        
+        // Helper Functions
+        function getStatusClass(status) {
+            switch(status.toLowerCase()) {
+                case 'confirmed': return 'status-available';
+                case 'completed': return 'status-available';
+                case 'pending': return 'status-pending';
+                case 'cancelled': return 'status-cancelled';
+                default: return '';
+            }
+        }
+        
+        function getMessageType(type) {
+            switch(type) {
+                case 'new_booking': return 'New Booking';
+                case 'payment_received': return 'Payment Received';
+                case 'system': return 'System Notification';
+                default: return 'Notification';
+            }
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        function updateUnreadCount() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const unreadCount = currentUser.inbox ? currentUser.inbox.filter(msg => !msg.read).length : 0;
+            
+            document.getElementById('inboxBadge').textContent = unreadCount;
+            document.getElementById('sidebarInboxBadge').textContent = unreadCount;
+            document.getElementById('unreadMessages').textContent = unreadCount;
+        }
+        
+        function updateUsersList(updatedUser) {
+            const users = JSON.parse(localStorage.getItem('smaartpark_users'));
+            const userIndex = users.findIndex(u => u.id === updatedUser.id);
+            if (userIndex !== -1) {
+                users[userIndex] = updatedUser;
+                localStorage.setItem('smaartpark_users', JSON.stringify(users));
+            }
+        }
+        
+        // Modal Functions
+        function showAddSpaceModal() {
+            document.getElementById('addSpaceModal').style.display = 'flex';
+        }
+        
+        function hideAddSpaceModal() {
+            document.getElementById('addSpaceModal').style.display = 'none';
+        }
+        
+        function showBookingModal() {
+            document.getElementById('bookingDetailsModal').style.display = 'flex';
+        }
+        
+        function hideBookingModal() {
+            document.getElementById('bookingDetailsModal').style.display = 'none';
+        }
+        
+        function showWithdrawModal() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            document.getElementById('withdrawAmount').max = currentUser.wallet;
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+        
+        function hideWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+        
+        // Action Functions
+        function addParkingSpace(e) {
+            e.preventDefault();
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings')) || [];
+            
+            // Create new parking object
+            const newParking = {
+                id: parkings.length > 0 ? Math.max(...parkings.map(p => p.id)) + 1 : 1,
+                renterId: currentUser.id,
+                title: document.getElementById('spaceTitle').value,
+                address: document.getElementById('spaceAddress').value,
+                description: document.getElementById('spaceDescription').value,
+                pricePerHour: parseFloat(document.getElementById('spacePrice').value),
+                type: document.getElementById('spaceType').value,
+                features: document.getElementById('spaceFeatures').value.split(',').map(f => f.trim()),
+                available: true,
+                coordinates: {
+                    lat: 40.7128 + (Math.random() * 0.02 - 0.01),
+                    lng: -74.0060 + (Math.random() * 0.02 - 0.01)
+                }
+            };
+            
+            // Add to parkings array
+            parkings.push(newParking);
+            localStorage.setItem('smaartpark_parkings', JSON.stringify(parkings));
+            
+            // Add to renter's parkingSpaces
+            if (!currentUser.parkingSpaces) currentUser.parkingSpaces = [];
+            currentUser.parkingSpaces.push({
+                id: newParking.id,
+                title: newParking.title,
+                pricePerHour: newParking.pricePerHour
+            });
+            
+            // Update current user and users list
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            updateUsersList(currentUser);
+            
+            // Close modal and refresh
+            hideAddSpaceModal();
+            loadParkingSpacesView();
+            
+            // Show success message
+            alert('Parking space added successfully!');
+        }
+        
+        function editParking(parkingId) {
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings'));
+            const parking = parkings.find(p => p.id === parkingId);
+            
+            if (!parking) {
+                alert('Parking space not found');
+                return;
+            }
+            
+            // In a real app, this would open an edit form with the parking details
+            // For now, we'll just show an alert with the parking info
+            alert(`Edit Parking Space:\n\nTitle: ${parking.title}\nAddress: ${parking.address}\nPrice: $${parking.pricePerHour}/hr`);
+        }
+        
+        function deleteParking(parkingId) {
+            if (confirm('Are you sure you want to delete this parking space? This cannot be undone.')) {
+                const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings'));
+                const updatedParkings = parkings.filter(p => p.id !== parkingId);
+                localStorage.setItem('smaartpark_parkings', JSON.stringify(updatedParkings));
+                
+                // Update current user's parkingSpaces
+                const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+                currentUser.parkingSpaces = currentUser.parkingSpaces.filter(p => p.id !== parkingId);
+                localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+                
+                // Update users list
+                updateUsersList(currentUser);
+                
+                // Refresh data
+                loadParkingSpacesView();
+                
+                // Show success message
+                alert('Parking space deleted successfully!');
+            }
+        }
+        
+        function toggleParkingAvailability(parkingId, available) {
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings'));
+            const parkingIndex = parkings.findIndex(p => p.id === parkingId);
+            
+            if (parkingIndex !== -1) {
+                parkings[parkingIndex].available = available;
+                localStorage.setItem('smaartpark_parkings', JSON.stringify(parkings));
+                loadParkingSpacesView();
+                
+                // Show status message
+                alert(`Parking space marked as ${available ? 'available' : 'unavailable'}`);
+            }
+        }
+        
+        function viewBookingDetails(bookingId) {
+            const bookings = JSON.parse(localStorage.getItem('smaartpark_bookings'));
+            const booking = bookings.find(b => b.id === bookingId);
+            
+            if (!booking) {
+                alert('Booking not found');
+                return;
+            }
+            
+            const parkings = JSON.parse(localStorage.getItem('smaartpark_parkings'));
+            const parking = parkings.find(p => p.id === booking.parkingId);
+            const users = JSON.parse(localStorage.getItem('smaartpark_users'));
+            const driver = users.find(u => u.id === booking.driverId);
+            
+            const content = document.getElementById('bookingDetailsContent');
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Booking Details</h3>
+                    <p><strong>ID:</strong> SP-${booking.id.toString().padStart(6, '0')}</p>
+                    <p><strong>Status:</strong> <span class="status-badge ${getStatusClass(booking.status)}">
+                        ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </span></p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Parking Space</h3>
+                    <p><strong>Title:</strong> ${parking?.title || 'Unknown space'}</p>
+                    <p><strong>Address:</strong> ${parking?.address || 'Unknown address'}</p>
+                    <p><strong>Price:</strong> $${parking?.pricePerHour || '0'}/hr</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Customer Information</h3>
+                    <p><strong>Name:</strong> ${driver?.name || 'Unknown user'}</p>
+                    <p><strong>Email:</strong> ${driver?.email || 'Unknown'}</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Booking Information</h3>
+                    <p><strong>Date:</strong> ${booking.date}</p>
+                    <p><strong>Time:</strong> ${booking.time}</p>
+                    <p><strong>Duration:</strong> ${booking.hours} hour${booking.hours > 1 ? 's' : ''}</p>
+                    <p><strong>Total Amount:</strong> $${booking.total.toFixed(2)}</p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="verifyBooking(${booking.id})">
+                        <i class="fas fa-check"></i> Verify Booking
+                    </button>
+                    <button class="btn btn-danger" onclick="cancelBooking(${booking.id})">
+                        <i class="fas fa-times"></i> Cancel Booking
+                    </button>
+                </div>
+            `;
+            
+            showBookingModal();
+        }
+        
+        function verifyBooking(bookingId) {
+            const bookings = JSON.parse(localStorage.getItem('smaartpark_bookings'));
+            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+            
+            if (bookingIndex !== -1) {
+                bookings[bookingIndex].status = 'completed';
+                localStorage.setItem('smaartpark_bookings', JSON.stringify(bookings));
+                
+                // Show success message and refresh
+                alert('Booking verified successfully!');
+                hideBookingModal();
+                loadBookingsView();
+            }
+        }
+        
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking? A refund will be issued to the customer.')) {
+                const bookings = JSON.parse(localStorage.getItem('smaartpark_bookings'));
+                const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+                
+                if (bookingIndex !== -1) {
+                    const booking = bookings[bookingIndex];
+                    
+                    // Update booking status
+                    bookings[bookingIndex].status = 'cancelled';
+                    localStorage.setItem('smaartpark_bookings', JSON.stringify(bookings));
+                    
+                    // Process refund (in a real app, this would involve payment processing)
+                    const users = JSON.parse(localStorage.getItem('smaartpark_users'));
+                    const driverIndex = users.findIndex(u => u.id === booking.driverId);
+                    const renterIndex = users.findIndex(u => u.id === booking.renterId);
+                    
+                    if (driverIndex !== -1 && renterIndex !== -1) {
+                        // Refund driver
+                        users[driverIndex].wallet += booking.total;
+                        
+                        // Deduct from renter
+                        users[renterIndex].wallet -= booking.total;
+                        
+                        // Add transaction records
+                        const transactionDate = new Date().toISOString();
+                        
+                        // Driver transaction
+                        if (!users[driverIndex].transactions) users[driverIndex].transactions = [];
+                        users[driverIndex].transactions.push({
+                            id: Date.now(),
+                            type: 'refund',
+                            amount: booking.total,
+                            description: `Refund for cancelled booking SP-${booking.id}`,
+                            date: transactionDate,
+                            status: 'completed'
+                        });
+                        
+                        // Renter transaction
+                        if (!users[renterIndex].transactions) users[renterIndex].transactions = [];
+                        users[renterIndex].transactions.push({
+                            id: Date.now() + 1,
+                            type: 'refund',
+                            amount: -booking.total,
+                            description: `Refund issued for cancelled booking SP-${booking.id}`,
+                            date: transactionDate,
+                            status: 'completed'
+                        });
+                        
+                        // Save users
+                        localStorage.setItem('smaartpark_users', JSON.stringify(users));
+                        
+                        // Update current user if it's the renter
+                        const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+                        if (currentUser.id === users[renterIndex].id) {
+                            currentUser.wallet = users[renterIndex].wallet;
+                            currentUser.transactions = users[renterIndex].transactions;
+                            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+                        }
+                    }
+                    
+                    // Show success message and refresh
+                    alert('Booking cancelled and refund issued successfully!');
+                    hideBookingModal();
+                    loadBookingsView();
+                    loadWalletView();
+                }
+            }
+        }
+        
+        function markAllMessagesAsRead() {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            if (currentUser.inbox) {
+                currentUser.inbox.forEach(message => {
+                    message.read = true;
+                });
+                localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+                updateUsersList(currentUser);
+                loadInboxView();
+                updateUnreadCount();
+                
+                // Show success message
+                alert('All messages marked as read');
+            }
+        }
+        
+        function updateProfile(e) {
+            e.preventDefault();
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Update user data
+            currentUser.name = document.getElementById('profileName').value;
+            currentUser.phone = document.getElementById('profilePhone').value;
+            currentUser.address = document.getElementById('profileAddress').value;
+            
+            // Update avatar initials
+            const newInitials = currentUser.name.split(' ').map(part => part[0]).join('').toUpperCase();
+            document.getElementById('profileAvatar').textContent = newInitials;
+            document.getElementById('userAvatar').textContent = newInitials;
+            
+            // Save changes
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            updateUsersList(currentUser);
+            
+            // Show success message
+            alert('Profile updated successfully!');
+        }
+        
+        function saveSettings(e) {
+            e.preventDefault();
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Update settings
+            currentUser.settings = {
+                notifications: document.getElementById('notificationPrefs').value,
+                timezone: document.getElementById('timezone').value
+            };
+            
+            // Save changes
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            updateUsersList(currentUser);
+            
+            // Show success message
+            alert('Settings saved successfully!');
+        }
+        
+        function changePassword(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Basic validation
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                alert('Password must be at least 8 characters long');
+                return;
+            }
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Verify current password (in a real app, this would be hashed)
+            if (currentPassword !== currentUser.password) {
+                alert('Current password is incorrect');
+                return;
+            }
+            
+            // Update password
+            currentUser.password = newPassword;
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            updateUsersList(currentUser);
+            
+            // Clear form
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Show success message
+            alert('Password changed successfully!');
+        }
+        
+        function withdrawFunds(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const method = document.getElementById('withdrawMethod').value;
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            
+            // Validation
+            if (amount < 10) {
+                alert('Minimum withdrawal amount is $10');
+                return;
+            }
+            
+            if (amount > currentUser.wallet) {
+                alert('Insufficient funds in your wallet');
+                return;
+            }
+            
+            if (method === 'bank') {
+                const accountNumber = document.getElementById('accountNumber').value;
+                const routingNumber = document.getElementById('routingNumber').value;
+                
+                if (!accountNumber || !routingNumber) {
+                    alert('Please enter your bank account details');
+                    return;
+                }
+            } else if (method === 'paypal') {
+                const paypalEmail = document.getElementById('paypalEmail').value;
+                
+                if (!paypalEmail) {
+                    alert('Please enter your PayPal email');
+                    return;
+                }
+            }
+            
+            // Create withdrawal request (in a real app, this would be sent to a server)
+            const withdrawalId = Date.now();
+            const withdrawalDate = new Date().toISOString();
+            
+            if (!currentUser.transactions) currentUser.transactions = [];
+            currentUser.transactions.push({
+                id: withdrawalId,
+                type: 'withdrawal',
+                amount: -amount,
+                description: `Withdrawal to ${method === 'bank' ? 'bank account' : 'PayPal'}`,
+                date: withdrawalDate,
+                status: 'pending'
+            });
+            
+            // Deduct from wallet (will be refunded if withdrawal fails)
+            currentUser.wallet -= amount;
+            
+            // Save changes
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            updateUsersList(currentUser);
+            
+            // Clear form and close modal
+            document.getElementById('withdrawForm').reset();
+            hideWithdrawModal();
+            
+            // Show success message
+            alert(`Withdrawal request for $${amount.toFixed(2)} submitted successfully! It will be processed within 3-5 business days.`);
+            
+            // Refresh wallet view
+            loadWalletView();
+        }
+    </script>
+</body>
+</html>

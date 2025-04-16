@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Parking | SmartPark</title>
+    <link rel="icon" href="../images/icon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--dark-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 25px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-menu .btn {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+        
+        .btn-logout:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark-color);
+            cursor: pointer;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            margin-top: 70px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 70px);
+            position: fixed;
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #555;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .booking-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .booking-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .booking-title {
+            font-size: 28px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .booking-subtitle {
+            font-size: 16px;
+            color: #777;
+        }
+        
+        .booking-body {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .booking-image {
+            width: 300px;
+            height: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .booking-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .booking-details {
+            flex: 1;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            width: 150px;
+            color: #777;
+        }
+        
+        .detail-value {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .booking-form {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .form-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .form-submit:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                margin-bottom: 20px;
+                box-shadow: none;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .dashboard {
+                flex-direction: column;
+                margin-top: 60px;
+            }
+            
+            .nav-links, .user-menu {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .booking-body {
+                flex-direction: column;
+            }
+            
+            .booking-image {
+                width: 100%;
+            }
+            .modal-title {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .qr-code-container p {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #555;
+            }
+
+            .qr-code-container {
+                text-align: center;
+                padding: 20px;
+            }
+
+            .qr-code {
+                margin: 0 auto; /* This centers the QR code container */
+                width: 200px;
+                height: 200px;
+                background-color: #f9f9f9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #eee;
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        .qr-code-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .modal-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .qr-code-container p {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eee;
+        }
+        
+        .qr-code-text {
+            font-size: 14px;
+            color: #777;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .booking-details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .booking-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .booking-detail-label {
+            color: #777;
+        }
+        
+        .booking-detail-value {
+            font-weight: 500;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--dark-color);
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="logo">Smaart<span>Park</span></a>
+            
+            <ul class="nav-links">
+                <li><a href="driver-dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" data-section="bookings"><i class="fas fa-history"></i> Bookings</a></li>
+                <li><a href="#" data-section="wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+            </ul>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">JD</div>
+                <a href="index.html" class="btn btn-logout" id="logoutBtn">Logout</a>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Dashboard -->
+    <div class="dashboard">
+        
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="booking-container" id="bookingContainer">
+                <!-- Content will be loaded by JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeQrModal">&times;</span>
+            <div class="qr-code-container">
+                <h2 class="modal-title">Your Booking is Confirmed🎉</h2>
+                <p>Show this QR code to the parking space owner for verification✅</p>
+                
+                <div class="qr-code" id="qrCode">
+                    <canvas id="qrCanvas"></canvas>
+                </div>
+                
+                <div class="qr-code-text">Booking ID: <span id="qrBookingId"></span></div>
+                
+                <div class="booking-details">
+                    <div class="booking-detail">
+                        <span class="booking-detail-label">Parking Space:</span>
+                        <span class="booking-detail-value" id="qrParkingTitle"></span>
+                    </div>
+                    <div class="booking-detail">
+                        <span class="booking-detail-label">Date & Time:</span>
+                        <span class="booking-detail-value" id="qrBookingDateTime"></span>
+                    </div>
+                    <div class="booking-detail">
+                        <span class="booking-detail-label">Duration:</span>
+                        <span class="booking-detail-value" id="qrBookingDuration"></span>
+                    </div>
+                    <div class="booking-detail">
+                        <span class="booking-detail-label">Amount Paid:</span>
+                        <span class="booking-detail-value" id="qrBookingAmount"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        // Initialize the page with current user data
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const parkingId = urlParams.get('id');
+            
+            if (!parkingId) {
+                window.location.href = 'driver-dashboard.html';
+                return;
+            }
+            
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            if (!currentUser || currentUser.type !== 'driver') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Set user avatar
+            const userAvatar = document.getElementById('userAvatar');
+            const nameParts = currentUser.name.split(' ');
+            const initials = nameParts.map(part => part[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            
+            // Load parking details
+            loadParkingDetails(parkingId);
+            
+            // Event listeners
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('smaartpark_currentUser');
+                window.location.href = 'index.html';
+            });
+            
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                const navLinks = document.querySelector('.nav-links');
+                const userMenu = document.querySelector('.user-menu');
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+                userMenu.style.display = userMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            // Booking form submission
+            document.getElementById('bookingForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                confirmBooking(parkingId);
+            });
+            
+            // Close QR modal
+            document.getElementById('closeQrModal').addEventListener('click', function() {
+                document.getElementById('qrModal').style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === document.getElementById('qrModal')) {
+                    document.getElementById('qrModal').style.display = 'none';
+                }
+            });
+        });
+        
+        // Load parking details
+        function loadParkingDetails(parkingId) {
+            const parking = JSON.parse(localStorage.getItem('smaartpark_parkings')).find(p => p.id === parseInt(parkingId));
+            
+            if (!parking) {
+                window.location.href = 'driver-dashboard.html';
+                return;
+            }
+            
+            const bookingContainer = document.getElementById('bookingContainer');
+            bookingContainer.innerHTML = `
+                <div class="booking-header">
+                    <h1 class="booking-title">Book ${parking.title}</h1>
+                    <p class="booking-subtitle">Complete your booking details below</p>
+                </div>
+                
+                <div class="booking-body">
+                    <div class="booking-image">
+                        <img src="${parking.image}" alt="${parking.title}">
+                    </div>
+                    <div class="booking-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Address:</span>
+                            <span class="detail-value">${parking.address}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Type:</span>
+                            <span class="detail-value">${parking.type}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Price:</span>
+                            <span class="detail-value">$${parking.pricePerHour}/hour</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Features:</span>
+                            <span class="detail-value">${parking.features.join(', ')}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="bookingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookingDate">Date</label>
+                            <input type="date" id="bookingDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookingTime">Time</label>
+                            <input type="time" id="bookingTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bookingHours">Duration (hours)</label>
+                        <input type="number" id="bookingHours" min="1" max="24" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bookingTotal">Total Amount</label>
+                        <input type="text" id="bookingTotal" value="$${parking.pricePerHour}" readonly>
+                    </div>
+                    
+                    <button type="submit" class="form-submit">Confirm Booking</button>
+                </form>
+            `;
+            
+            // Set default date/time (today + 1 hour)
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            document.getElementById('bookingDate').valueAsDate = tomorrow;
+            document.getElementById('bookingTime').value = '09:00';
+            
+            // Calculate initial total
+            document.getElementById('bookingHours').addEventListener('input', function() {
+                calculateBookingTotal(parking.pricePerHour);
+            });
+        }
+        
+        // Calculate booking total
+        function calculateBookingTotal(pricePerHour) {
+            const hours = parseInt(document.getElementById('bookingHours').value) || 1;
+            const total = pricePerHour * hours;
+            
+            document.getElementById('bookingTotal').value = `$${total.toFixed(2)}`;
+        }
+        
+        // Confirm booking
+        function confirmBooking(parkingId) {
+            const currentUser = JSON.parse(localStorage.getItem('smaartpark_currentUser'));
+            const parking = JSON.parse(localStorage.getItem('smaartpark_parkings')).find(p => p.id === parseInt(parkingId));
+            
+            // Get renter information
+            const users = JSON.parse(localStorage.getItem('smaartpark_users'));
+            const renter = users.find(u => u.id === parking.renterId);
+            
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const hours = parseInt(document.getElementById('bookingHours').value);
+            const total = parking.pricePerHour * hours;
+            
+            // Check if user has enough balance
+            if (currentUser.wallet < total) {
+                alert('Insufficient funds in your wallet. Please add money to your wallet.');
+                return;
+            }
+            
+            // Create booking
+            let nextBookingId = parseInt(localStorage.getItem('smaartpark_nextBookingId')) || 1;
+            const booking = {
+                id: nextBookingId,
+                driverId: currentUser.id,
+                renterId: renter.id,
+                parkingId: parking.id,
+                date,
+                time,
+                hours,
+                total,
+                status: 'confirmed',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Update bookings
+            let bookings = JSON.parse(localStorage.getItem('smaartpark_bookings')) || [];
+            bookings.push(booking);
+            localStorage.setItem('smaartpark_bookings', JSON.stringify(bookings));
+            localStorage.setItem('smaartpark_nextBookingId', (nextBookingId + 1).toString());
+            
+            // Update driver's wallet
+            currentUser.wallet -= total;
+            localStorage.setItem('smaartpark_currentUser', JSON.stringify(currentUser));
+            
+            // Update driver in users list
+            const driverIndex = users.findIndex(u => u.id === currentUser.id);
+            users[driverIndex] = currentUser;
+            
+            // Update renter's wallet
+            renter.wallet += total;
+            const renterIndex = users.findIndex(u => u.id === renter.id);
+            users[renterIndex] = renter;
+            localStorage.setItem('smaartpark_users', JSON.stringify(users));
+            
+            // Add notification to renter's inbox
+            renter.inbox = renter.inbox || [];
+            renter.inbox.push({
+                id: Date.now(),
+                type: 'new_booking',
+                message: `New booking for ${parking.title} on ${date} at ${time} for ${hours} hours. Amount: $${total.toFixed(2)}`,
+                bookingId: nextBookingId,
+                read: false,
+                createdAt: new Date().toISOString()
+            });
+            
+            // Show QR code
+            showQrCode(booking, parking);
+        }
+        function showQrCode(booking) {
+        const parking = JSON.parse(localStorage.getItem('smaartpark_parkings')).find(p => p.id === booking.parkingId);
+        
+        document.getElementById('qrBookingId').textContent = `SP-${booking.id.toString().padStart(6, '0')}`;
+        document.getElementById('qrParkingTitle').textContent = parking.title;
+        document.getElementById('qrBookingDateTime').textContent = `${booking.date} at ${booking.time}`;
+        document.getElementById('qrBookingDuration').textContent = `${booking.hours} hour${booking.hours > 1 ? 's' : ''}`;
+        document.getElementById('qrBookingAmount').textContent = `$${booking.total.toFixed(2)}`;
+        
+        // Generate QR code
+        const qrCanvas = document.getElementById('qrCanvas');
+        QRCode.toCanvas(qrCanvas, `SmaartPark Booking ID: SP-${booking.id}`, function(error) {
+            if (error) console.error(error);
+        });
+        
+        // Show modal
+        document.getElementById('qrModal').style.display = 'flex';
+    }
+
+    // Close modal when clicking X or outside
+    document.getElementById('closeQrModal').addEventListener('click', function() {
+        document.getElementById('qrModal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function(e) {
+        if (e.target === document.getElementById('qrModal')) {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html>
